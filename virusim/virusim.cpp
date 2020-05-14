@@ -10,80 +10,85 @@
 #include "Random.h"
 #include "Population.h"
 
-void
-checkCommandLine(int argc, char** argv, int& size, int& trials, int& probs)
+void checkCommandLine(int argc, char** argv, int& size, int& trials, int& probs)
 {
-   if (argc > 1) {
-      size = atoi(argv[1]);
-   }   
-   if (argc > 2) {
-      trials = atoi(argv[2]);
-   }
-   if (argc > 3) {
-      probs = atoi(argv[3]);
-   }   
+	char* ptr;
+	if (argc > 1)
+	{
+		size = strtol(argv[1], &ptr, 10);
+	}
+	if (argc > 2)
+	{
+		trials = strtol(argv[2], &ptr, 10);
+	}
+	if (argc > 3)
+	{
+		probs = strtol(argv[3], &ptr, 10);
+	}
 }
 
-int 
-main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
-   
-   // parâmetros dos experimentos
-   int population_size = 30;
-   int n_trials = 5000;
-   int n_probs = 101;
 
-   double* percent_infected; // percentuais de infectados (saída)
-   double* prob_spread;      // probabilidades a serem testadas (entrada)
-   double prob_min = 0.0;
-   double prob_max = 1.0;
-   double prob_step;
-   int base_seed = 100;
+	// parâmetros dos experimentos
+	int population_size = 30;
+	int n_trials = 5000;
+	int n_probs = 101;
 
-   checkCommandLine(argc, argv, population_size, n_trials, n_probs);
-    
-   try {
+	double* percent_infected; // percentuais de infectados (saída)
+	double* prob_spread;      // probabilidades a serem testadas (entrada)
+	double prob_min = 0.0;
+	double prob_max = 1.0;
+	double prob_step;
+	int base_seed = 100;
 
-      Population* population = new Population(population_size);
-      Random rand;
+	checkCommandLine(argc, argv, population_size, n_trials, n_probs);
 
-      prob_spread = new double[n_probs];
-      percent_infected = new double[n_probs];
+	try
+	{
 
-      prob_step = (prob_max - prob_min)/(double)(n_probs-1);
+		auto* population = new Population(population_size);
+		Random rand;
 
-      printf("Probabilidade, Percentual Infectado\n");
+		prob_spread = new double[n_probs];
+		percent_infected = new double[n_probs];
 
-      // para cada probabilidade, calcula o percentual de pessoas infectadas
-      for (int ip = 0; ip < n_probs; ip++) {
+		prob_step = (prob_max - prob_min) / (double)(n_probs - 1);
 
-         prob_spread[ip] = prob_min + (double) ip * prob_step;
-         percent_infected[ip] = 0.0;
-         rand.setSeed(base_seed+ip); // nova seqüência de números aleatórios
+		printf("Probabilidade, Percentual Infectado\n");
 
-         // executa vários experimentos para esta probabilidade
-         for (int it = 0; it < n_trials; it++) {
-            // queima floresta até o fogo apagar
-            population->propagateUntilOut(population->centralPerson(), prob_spread[ip], rand);
-            percent_infected[ip] += population->getPercentInfected();
-         }
+		// para cada probabilidade, calcula o percentual de pessoas infectadas
+		for (int ip = 0; ip < n_probs; ip++)
+		{
 
-         // calcula média dos percentuais de árvores queimadas
-         percent_infected[ip] /= n_trials;
+			prob_spread[ip] = prob_min + (double)ip * prob_step;
+			percent_infected[ip] = 0.0;
+			rand.setSeed(base_seed + ip); // nova seqüência de números aleatórios
 
-         // mostra resultado para esta probabilidade
-         printf("%lf, %lf\n", prob_spread[ip], percent_infected[ip]);
-      }
+			// executa vários experimentos para esta probabilidade
+			for (int it = 0; it < n_trials; it++)
+			{
+				// queima floresta até o fogo apagar
+				population->propagateUntilOut(population->centralPerson(), prob_spread[ip], rand);
+				percent_infected[ip] += population->getPercentInfected();
+			}
 
-      delete[] prob_spread;
-      delete[] percent_infected;
-   }
-   catch (std::bad_alloc)
-   {
-      std::cerr << "Erro: alocacao de memoria" << std::endl;
-      return 1;
-   }
+			// calcula média dos percentuais de árvores queimadas
+			percent_infected[ip] /= n_trials;
 
-   return 0;
+			// mostra resultado para esta probabilidade
+			printf("%lf, %lf\n", prob_spread[ip], percent_infected[ip]);
+		}
+
+		delete[] prob_spread;
+		delete[] percent_infected;
+	}
+	catch (std::bad_alloc& ex)
+	{
+		std::cerr << "Erro: alocacao de memoria" << std::endl;
+		return 1;
+	}
+
+	return 0;
 }
 
