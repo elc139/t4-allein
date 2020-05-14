@@ -31,7 +31,7 @@ class Population
       void propagate(double prob_spread, Random& r);     
 
       bool isPropagating();
-      bool virusSpreads(double prob_spread, Random& r);
+      static bool virusSpreads(double prob_spread, Random& r);
 
    private:
 

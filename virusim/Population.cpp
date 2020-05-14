@@ -129,8 +129,5 @@ Population::isPropagating()
 bool
 Population::virusSpreads(double prob_spread, Random& r) 
 {
-   if (r.nextDouble() < prob_spread) 
-      return true;
-   else
-      return false;
+	return r.nextDouble() < prob_spread;
 }
